@@ -1,6 +1,6 @@
 # Komunitas ID-JP — Database Anggota
 
-Aplikasi web (PWA) untuk mengelola data anggota komunitas: login, persetujuan admin, data anggota, absensi, forum, peta (Google My Maps), dan tombol tanya admin. Tanpa proses build: cukup berkas statis, jadi bisa langsung di-deploy di Vercel.
+Aplikasi web (PWA) untuk mengelola data anggota komunitas: login dengan Google atau email, data anggota, absensi, forum, peta (Google My Maps), dan tombol tanya admin. Akun baru otomatis bisa masuk tanpa persetujuan admin. Tanpa proses build: cukup berkas statis, jadi bisa langsung di-deploy di Vercel.
 
 ## Susunan berkas
 
@@ -13,7 +13,7 @@ vercel.json           pengaturan hosting Vercel
 style.css             seluruh tampilan
 core.js               state, helper, daftar menu
 supabase.js           koneksi Supabase + penyimpanan data/foto
-auth.js               login, daftar, layar tunggu persetujuan, mulai aplikasi
+auth.js               login Google/email dan mulai aplikasi
 router.js             pindah halaman, menu samping, bar bawah
 views-*.js            halaman: dashboard, anggota, formulir, absen+forum, peta, admin
 mascot.js             maskot (bisa digeser, ketuk = tanya admin)
@@ -25,11 +25,13 @@ schema.sql            tabel + aturan keamanan (dijalankan sekali di Supabase)
 ## Langkah 1 — Siapkan Supabase (login + database), gratis
 
 1. Daftar di https://supabase.com lalu **New project** (pilih wilayah terdekat, mis. Tokyo/Singapore). Catat password database.
-2. Buka **SQL Editor** → **New query** → tempel seluruh isi `schema.sql` → **Run**. Jika skema sebelumnya sudah dipasang, jalankan lagi versi terbaru ini.
+2. Buka **SQL Editor** → **New query** → tempel seluruh isi `schema.sql` → **Run**. Jika skema sebelumnya sudah dipasang, jalankan lagi versi terbaru ini agar pendaftar lama yang masih menunggu persetujuan juga bisa masuk.
 3. **Project Settings → API**: salin **Project URL** dan **publishable key** (`sb_publishable_...`). Jika proyek masih memakai key lama, gunakan **anon public key**.
 4. Buka `config.js`, ganti kedua nilainya.
    > Publishable key dan anon public key memang dirancang untuk frontend. Keamanan data dijaga aturan RLS di `schema.sql`. **Jangan pernah** memasukkan `sb_secret_` atau `service_role` key ke repo.
-5. **Authentication → Providers → Email**: untuk uji coba, matikan *Confirm email* agar pendaftar langsung bisa masuk. Jika dibiarkan aktif, pendaftar harus klik tautan di email dulu.
+5. **Authentication → Sign In / Providers → Google**: aktifkan Google, lalu masukkan **Client ID** dan **Client Secret** dari kredensial OAuth Google Cloud. Tambahkan URL callback yang ditampilkan Supabase di konfigurasi OAuth Google Cloud.
+6. **Authentication → URL Configuration**: isi **Site URL** dengan alamat aplikasi dan tambahkan alamat tersebut ke **Redirect URLs** (misalnya `https://komunitas-id-jp.vercel.app/**`).
+7. **Authentication → Sign In / Providers → Email**: pengaturan ini hanya diperlukan untuk login/daftar dengan email. Google dapat langsung membuat sesi login.
 
 ## Langkah 2 — Unggah ke GitHub
 
@@ -66,7 +68,7 @@ Email dalam allowlist otomatis mendapat role admin saat mendaftar. Jika akun ema
    where lower(email) = lower('EMAIL-ADMIN@contoh.com');
    ```
 
-Pendaftar lain tetap berstatus *Menunggu persetujuan* dan dapat dikelola dari menu **Operator**.
+Pengguna baru yang login dengan Google atau mendaftar dengan email otomatis mendapat role anggota. Tidak perlu persetujuan admin. Email admin dalam allowlist tetap mendapat role admin.
 
 ## Langkah 5 — Pasang di HP
 
@@ -77,9 +79,8 @@ Pendaftar lain tetap berstatus *Menunggu persetujuan* dan dapat dikelola dari me
 
 | Peran | Bisa |
 |---|---|
-| Menunggu | hanya melihat layar tunggu |
 | Anggota | melihat data, absen (Hadir), forum, kirim pertanyaan ke admin |
-| Admin | semuanya: kelola anggota, kegiatan, import, peta, persetujuan pendaftar, pesan masuk |
+| Admin | semuanya: kelola anggota, kegiatan, import, peta, pesan masuk |
 
 ## Mengatur nomor WhatsApp admin
 

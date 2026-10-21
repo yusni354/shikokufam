@@ -2,12 +2,12 @@
 -- KOMUNITAS ID-JP - skema Supabase (jalankan sekali di SQL Editor)
 -- ============================================================
 
--- 1) Profil pengguna: setiap akun baru otomatis berstatus 'pending'
+-- 1) Profil pengguna: setiap akun baru otomatis berstatus 'member'
 create table if not exists public.profiles (
   id uuid primary key references auth.users on delete cascade,
   email text,
   nama text,
-  role text not null default 'pending' check (role in ('pending','member','admin','ditolak')),
+  role text not null default 'member' check (role in ('pending','member','admin','ditolak')),
   created_at timestamptz default now()
 );
 
@@ -35,7 +35,7 @@ create or replace function public.my_role() returns text
 language sql stable security definer set search_path = public as
 $$ select role from public.profiles where id = auth.uid() $$;
 
--- 4) Buat profil otomatis saat ada yang mendaftar
+-- 4) Akun baru langsung menjadi anggota; email allowlist mendapat role admin.
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as
 $$
@@ -44,10 +44,10 @@ begin
   values (
     new.id,
     new.email,
-    coalesce(new.raw_user_meta_data->>'nama', new.email),
+    coalesce(new.raw_user_meta_data->>'nama', new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', new.email),
     case when exists (
       select 1 from public.admin_allowlist where lower(email) = lower(new.email)
-    ) then 'admin' else 'pending' end
+    ) then 'admin' else 'member' end
   );
   return new;
 end
@@ -55,6 +55,13 @@ $$;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Aktifkan pendaftar lama, tanpa menurunkan akun admin dalam allowlist.
+update public.profiles p
+set role = case when exists (
+  select 1 from public.admin_allowlist a where lower(a.email) = lower(p.email)
+) then 'admin' else 'member' end
+where p.role = 'pending';
 
 -- 5) Keamanan baris (RLS)
 alter table public.profiles enable row level security;
