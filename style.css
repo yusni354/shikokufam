@@ -63,5 +63,8 @@ body.open #dr{transform:none}body.open #ov{display:block}
 .auth{max-width:380px;margin:auto;text-align:left}
 .auth h1,.auth .sub{text-align:center}
 .logo.big{width:56px;height:56px;border-radius:18px;font-size:28px;margin:0 auto 8px;background:var(--g);color:#fff}
+.btn.google{width:100%;margin-top:12px;background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:0 3px 10px rgba(23,50,77,.08)}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--mut);font-size:13px}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:var(--line)}
 .btn.s.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .err{color:#c0392b;font-size:14px;min-height:1em;margin:6px 0}

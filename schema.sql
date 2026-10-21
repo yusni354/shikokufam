@@ -22,6 +22,14 @@ create table if not exists public.docs (
 create index if not exists docs_col_idx on public.docs (col);
 alter table public.docs replica identity full;
 
+-- Email yang terdaftar di sini mendapat role admin saat mendaftar.
+create table if not exists public.admin_allowlist (
+  email text primary key,
+  created_at timestamptz not null default now()
+);
+alter table public.admin_allowlist enable row level security;
+revoke all on public.admin_allowlist from anon, authenticated;
+
 -- 3) Fungsi bantu: peran pengguna yang sedang login
 create or replace function public.my_role() returns text
 language sql stable security definer set search_path = public as
@@ -32,8 +40,15 @@ create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as
 $$
 begin
-  insert into public.profiles (id, email, nama)
-  values (new.id, new.email, coalesce(new.raw_user_meta_data->>'nama', new.email));
+  insert into public.profiles (id, email, nama, role)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data->>'nama', new.email),
+    case when exists (
+      select 1 from public.admin_allowlist where lower(email) = lower(new.email)
+    ) then 'admin' else 'pending' end
+  );
   return new;
 end
 $$;
@@ -76,7 +91,16 @@ drop policy if exists "docs: hapus" on public.docs;
 create policy "docs: hapus" on public.docs for delete using (public.my_role() = 'admin');
 
 -- 6) Realtime (data tampil langsung di semua perangkat)
-alter publication supabase_realtime add table public.docs;
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'docs'
+  ) then
+    alter publication supabase_realtime add table public.docs;
+  end if;
+end
+$$;
 
 -- 7) Penyimpanan foto dan surat (bucket 'media')
 insert into storage.buckets (id, name, public) values ('media','media', true)
@@ -88,7 +112,11 @@ drop policy if exists "media: admin hapus" on storage.objects;
 create policy "media: admin hapus" on storage.objects
   for delete using (bucket_id = 'media' and public.my_role() = 'admin');
 
--- ============================================================
--- SETELAH ANDA DAFTAR DI APLIKASI, jadikan akun Anda admin utama:
---   update public.profiles set role = 'admin' where email = 'EMAIL-ANDA@contoh.com';
--- ============================================================
+-- Tambahkan email admin lewat SQL Editor, bukan dari aplikasi:
+-- insert into public.admin_allowlist (email)
+-- values (lower('EMAIL-ADMIN@contoh.com'))
+-- on conflict (email) do nothing;
+--
+-- Jika akun email tersebut sudah terdaftar, jalankan juga:
+-- update public.profiles set role = 'admin'
+-- where lower(email) = lower('EMAIL-ADMIN@contoh.com');

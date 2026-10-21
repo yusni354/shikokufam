@@ -25,7 +25,7 @@ schema.sql            tabel + aturan keamanan (dijalankan sekali di Supabase)
 ## Langkah 1 — Siapkan Supabase (login + database), gratis
 
 1. Daftar di https://supabase.com lalu **New project** (pilih wilayah terdekat, mis. Tokyo/Singapore). Catat password database.
-2. Buka **SQL Editor** → **New query** → tempel seluruh isi `schema.sql` → **Run**.
+2. Buka **SQL Editor** → **New query** → tempel seluruh isi `schema.sql` → **Run**. Jika skema sebelumnya sudah dipasang, jalankan lagi versi terbaru ini.
 3. **Project Settings → API**: salin **Project URL** dan **publishable key** (`sb_publishable_...`). Jika proyek masih memakai key lama, gunakan **anon public key**.
 4. Buka `config.js`, ganti kedua nilainya.
    > Publishable key dan anon public key memang dirancang untuk frontend. Keamanan data dijaga aturan RLS di `schema.sql`. **Jangan pernah** memasukkan `sb_secret_` atau `service_role` key ke repo.
@@ -51,14 +51,22 @@ git push origin main
 
 Setiap kali Anda mengubah berkas dan melakukan *commit* ke GitHub, Vercel otomatis memperbarui situs.
 
-## Langkah 4 — Jadikan diri Anda admin utama
+## Langkah 4 — Atur akun admin
 
-1. Buka alamat situs → **Daftar** dengan email Anda. Akun baru berstatus *Menunggu persetujuan*.
-2. Di Supabase **SQL Editor**, jalankan (ganti emailnya):
+Di Supabase **SQL Editor**, daftarkan email admin (ganti alamat contoh dengan email Anda):
    ```sql
-   update public.profiles set role = 'admin' where email = 'EMAIL-ANDA@contoh.com';
+   insert into public.admin_allowlist (email)
+   values (lower('EMAIL-ADMIN@contoh.com'))
+   on conflict (email) do nothing;
    ```
-3. Muat ulang aplikasi: Anda sudah admin. Pendaftar berikutnya muncul di menu **Operator** (Setujui / Jadikan admin / Tolak).
+
+Email dalam allowlist otomatis mendapat role admin saat mendaftar. Jika akun email tersebut sudah terdaftar, jalankan juga:
+   ```sql
+   update public.profiles set role = 'admin'
+   where lower(email) = lower('EMAIL-ADMIN@contoh.com');
+   ```
+
+Pendaftar lain tetap berstatus *Menunggu persetujuan* dan dapat dikelola dari menu **Operator**.
 
 ## Langkah 5 — Pasang di HP
 

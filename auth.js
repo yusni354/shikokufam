@@ -15,6 +15,20 @@ function showLogin() {
       nm = h('input', { placeholder: 'Nama lengkap' }), err = h('p', { class: 'err' }),
       tab = (m, t) => h('button', { class: 'btn s' + (mode === m ? ' on' : ''), onclick: () => { mode = m; draw(); } }, t),
       ok = h('button', { class: 'btn', style: 'width:100%;margin-top:8px' }, mode === 'in' ? 'Masuk' : 'Daftar');
+    const google = h('button', { class: 'btn google', type: 'button' }, 'Lanjutkan dengan Google');
+    google.onclick = async () => {
+      err.textContent = ''; google.disabled = true;
+      try {
+        const { error } = await sb.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: location.origin + location.pathname }
+        });
+        if (error) throw error;
+      } catch (e) {
+        err.textContent = PESAN[e.message] || e.message || 'Terjadi kesalahan';
+        google.disabled = false;
+      }
+    };
     ok.onclick = async () => {
       err.textContent = ''; ok.disabled = true;
       try {
@@ -31,8 +45,8 @@ function showLogin() {
       ok.disabled = false;
     };
     guestScreen(h('div', { class: 'logo big' }, '✓'), h('h1', {}, 'Komunitas ID-JP'), h('p', { class: 'sub' }, 'Database Anggota'),
-      h('div', { class: 'fl' }, tab('in', 'Masuk'), tab('up', 'Daftar')), mode === 'up' && nm, em, pw, err, ok,
-      mode === 'up' && h('p', { class: 'warn' }, 'Setelah mendaftar, akun Anda perlu disetujui admin sebelum bisa dipakai.'));
+      google, h('div', { class: 'auth-divider' }, 'atau dengan email'),
+      h('div', { class: 'fl' }, tab('in', 'Masuk'), tab('up', 'Daftar')), mode === 'up' && nm, em, pw, err, ok);
   };
   draw();
 }
