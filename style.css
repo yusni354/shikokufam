@@ -1,4 +1,4 @@
-:root{--bg:#f5f1e6;--card:#fffdf8;--ink:#17324d;--mut:#6f7b86;--line:#e8e1d0;--acc:#2f8fc1;--g:linear-gradient(135deg,#4fb0d9,#2f86b8);color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#e8f4fc;--card:#fffdf8;--ink:#17324d;--mut:#6f7b86;--line:#d6e8f3;--acc:#2f8fc1;--g:linear-gradient(135deg,#4fb0d9,#2f86b8);color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Ubuntu,"Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 button,input,select,textarea{font:inherit}
