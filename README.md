@@ -53,22 +53,15 @@ git push origin main
 
 Setiap kali Anda mengubah berkas dan melakukan *commit* ke GitHub, Vercel otomatis memperbarui situs.
 
-## Langkah 4 — Atur akun admin
+## Opsional — Jadikan akun Anda admin
 
-Di Supabase **SQL Editor**, daftarkan email admin (ganti alamat contoh dengan email Anda):
-   ```sql
-   insert into public.admin_allowlist (email)
-   values (lower('EMAIL-ADMIN@contoh.com'))
-   on conflict (email) do nothing;
-   ```
-
-Email dalam allowlist otomatis mendapat role admin saat mendaftar. Jika akun email tersebut sudah terdaftar, jalankan juga:
+Untuk mencoba login Google sebagai anggota, langkah ini tidak diperlukan. Jika ingin membuka fitur admin, login dulu dengan Google lalu jalankan perintah berikut di Supabase **SQL Editor** (ganti email dengan email Google Anda):
    ```sql
    update public.profiles set role = 'admin'
-   where lower(email) = lower('EMAIL-ADMIN@contoh.com');
+   where lower(email) = lower('EMAIL-GOOGLE-ANDA@gmail.com');
    ```
 
-Pengguna baru yang login dengan Google atau mendaftar dengan email otomatis mendapat role anggota. Tidak perlu persetujuan admin. Email admin dalam allowlist tetap mendapat role admin.
+Setiap akun baru otomatis mendapat role anggota. Tidak perlu allowlist atau persetujuan admin.
 
 ## Langkah 5 — Pasang di HP
 

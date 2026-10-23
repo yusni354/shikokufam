@@ -22,20 +22,12 @@ create table if not exists public.docs (
 create index if not exists docs_col_idx on public.docs (col);
 alter table public.docs replica identity full;
 
--- Email yang terdaftar di sini mendapat role admin saat mendaftar.
-create table if not exists public.admin_allowlist (
-  email text primary key,
-  created_at timestamptz not null default now()
-);
-alter table public.admin_allowlist enable row level security;
-revoke all on public.admin_allowlist from anon, authenticated;
-
 -- 3) Fungsi bantu: peran pengguna yang sedang login
 create or replace function public.my_role() returns text
 language sql stable security definer set search_path = public as
 $$ select role from public.profiles where id = auth.uid() $$;
 
--- 4) Akun baru langsung menjadi anggota; email allowlist mendapat role admin.
+-- 4) Setiap akun baru langsung menjadi anggota.
 create or replace function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = public as
 $$
@@ -45,9 +37,7 @@ begin
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'nama', new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', new.email),
-    case when exists (
-      select 1 from public.admin_allowlist where lower(email) = lower(new.email)
-    ) then 'admin' else 'member' end
+    'member'
   );
   return new;
 end
@@ -56,12 +46,8 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function public.handle_new_user();
 
--- Aktifkan pendaftar lama, tanpa menurunkan akun admin dalam allowlist.
-update public.profiles p
-set role = case when exists (
-  select 1 from public.admin_allowlist a where lower(a.email) = lower(p.email)
-) then 'admin' else 'member' end
-where p.role = 'pending';
+-- Aktifkan pendaftar lama yang masih menunggu persetujuan.
+update public.profiles set role = 'member' where role = 'pending';
 
 -- 5) Keamanan baris (RLS)
 alter table public.profiles enable row level security;
@@ -119,11 +105,6 @@ drop policy if exists "media: admin hapus" on storage.objects;
 create policy "media: admin hapus" on storage.objects
   for delete using (bucket_id = 'media' and public.my_role() = 'admin');
 
--- Tambahkan email admin lewat SQL Editor, bukan dari aplikasi:
--- insert into public.admin_allowlist (email)
--- values (lower('EMAIL-ADMIN@contoh.com'))
--- on conflict (email) do nothing;
---
--- Jika akun email tersebut sudah terdaftar, jalankan juga:
+-- Opsional: jadikan akun Anda admin setelah login pertama:
 -- update public.profiles set role = 'admin'
--- where lower(email) = lower('EMAIL-ADMIN@contoh.com');
+-- where lower(email) = lower('EMAIL-GOOGLE-ANDA@gmail.com');
