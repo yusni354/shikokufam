@@ -1,6 +1,6 @@
 /* Maskot: bisa digeser, ketuk untuk tanya admin */
 /* ===== maskot: gambar diam, bisa digeser, ketuk untuk tanya admin ===== */
-const ADMIN_WA=''; /* isi nomor WhatsApp admin, contoh: 6281234567890 */
+const ADMIN_WA='07091113354'; /* isi nomor WhatsApp admin, contoh: 6281234567890 */
 const pet=$('#pet');let drag=null;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function closeMenu(){const m=$('#pm');if(m)m.remove()}
