@@ -1,5 +1,5 @@
 /* Dasar aplikasi: state, helper DOM, daftar menu, navigasi */
-const S={members:[],events:[],topics:[],view:'dash',admin:false,uid:null,name:'',db:null};
+const S={members:[],events:[],topics:[],comments:[],view:'dash',admin:false,uid:null,name:'',db:null};
 const $=s=>document.querySelector(s);
 function h(t,p,...k){const e=document.createElement(t);for(const a in p||{}){if(a==='onclick')e.onclick=p[a];else if(a==='class')e.className=p[a];else e.setAttribute(a,p[a])}k.flat().forEach(c=>{if(c!=null&&c!==false)e.append(c)});return e}
 const ALL=[['dash','🏠 Dashboard'],['members','👥 Data Anggota'],['absen','📝 Absensi'],['forum','💬 Forum'],['peta','🗺️ Peta & Wilayah'],['import','📥 Import Database',1],['op','🛡️ Operator',1],['pesan','📨 Pesan Masuk',1]];

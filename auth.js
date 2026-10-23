@@ -82,7 +82,7 @@ async function boot() {
   S.admin = S.role === 'admin';
   S.assets = S.admin ? { upload: uploadMedia } : null;
   S.db = DB;
-  ['members', 'events', 'topics', 'tanya', 'pengaturan'].forEach(n => sub(n, n));
+  ['members', 'events', 'topics', 'comments', 'tanya', 'pengaturan'].forEach(n => sub(n, n));
   if (S.admin) loadProfiles();
   document.body.classList.remove('guest');
   render();

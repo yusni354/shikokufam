@@ -72,8 +72,24 @@ Setiap akun baru otomatis mendapat role anggota. Tidak perlu allowlist atau pers
 
 | Peran | Bisa |
 |---|---|
-| Anggota | melihat data, absen (Hadir), forum, kirim pertanyaan ke admin |
-| Admin | semuanya: kelola anggota, kegiatan, import, peta, pesan masuk |
+| Anggota | melihat data, absen (Hadir), membuat topik dan komentar forum, mengubah/menghapus komentar sendiri, kirim pertanyaan ke admin |
+| Admin | semuanya: kelola anggota, kegiatan, moderasi topik dan komentar, ekspor rekap absensi CSV, import, peta, pesan masuk |
+
+Kegiatan dapat dilengkapi tanggal, waktu, dan lokasi. Admin dapat mengunduh daftar anggota yang hadir sebagai CSV dari halaman Absensi.
+
+Forum mendukung komentar pada topik. Pemilik komentar dapat mengubah atau menghapus komentarnya sendiri; admin dapat menghapus komentar maupun topik beserta komentar di dalamnya. Terapkan kebijakan RLS forum melalui workflow migrasi di bawah.
+
+## Menjalankan migrasi Supabase dengan persetujuan
+
+Migrasi forum dapat diterapkan melalui GitHub Actions tanpa menyalin SQL ke Supabase:
+
+1. Di repositori GitHub, buka **Settings → Environments → New environment** dan beri nama `supabase-production`.
+2. Aktifkan **Required reviewers**, tambahkan akun Anda, dan batasi deployment hanya dari branch utama. Jangan lanjut sebelum aturan reviewer aktif.
+3. Di environment `supabase-production`, tambahkan **Environment secret** bernama `SUPABASE_DB_URL`. Isi dengan connection string PostgreSQL dari Supabase **Connect**. Gunakan **Session pooler** pada port `5432`; jangan menaruh URL atau password database di file repo.
+4. Setelah workflow dan migrasi tersedia pada branch utama, buka **Actions → Deploy Supabase migration → Run workflow**.
+5. Buka deployment yang menunggu persetujuan, periksa workflow/branch-nya, lalu klik **Review deployments → Approve and deploy**. Migrasi hanya berjalan setelah disetujui.
+
+Workflow ini hanya menerapkan migrasi forum yang tercatat di `supabase/migrations`; workflow tidak menjalankan ulang seluruh `schema.sql`.
 
 ## Mengatur nomor WhatsApp admin
 

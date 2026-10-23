@@ -68,20 +68,36 @@ create policy "docs: baca" on public.docs for select using (
   and (col <> 'tanya' or public.my_role() = 'admin' or owner = auth.uid())
 );
 
--- Admin menulis apa saja; anggota hanya kegiatan, forum, dan pertanyaan
+-- Admin menulis apa saja; anggota membuat topik dan komentar atas nama sendiri
 drop policy if exists "docs: tambah" on public.docs;
 create policy "docs: tambah" on public.docs for insert with check (
   public.my_role() = 'admin'
-  or (public.my_role() = 'member' and col in ('events','topics','tanya'))
+  or (public.my_role() = 'member' and col in ('events','tanya'))
+  or (public.my_role() = 'member' and col in ('topics','comments')
+    and owner = auth.uid() and data->>'by' = auth.uid()::text)
 );
 
 drop policy if exists "docs: ubah" on public.docs;
 create policy "docs: ubah" on public.docs for update
-  using (public.my_role() = 'admin' or (public.my_role() = 'member' and col in ('events','topics')))
-  with check (public.my_role() = 'admin' or (public.my_role() = 'member' and col in ('events','topics')));
+  using (
+    public.my_role() = 'admin'
+    or (public.my_role() = 'member' and col = 'events')
+    or (public.my_role() = 'member' and col in ('topics','comments')
+      and owner = auth.uid() and data->>'by' = auth.uid()::text)
+  )
+  with check (
+    public.my_role() = 'admin'
+    or (public.my_role() = 'member' and col = 'events')
+    or (public.my_role() = 'member' and col in ('topics','comments')
+      and owner = auth.uid() and data->>'by' = auth.uid()::text)
+  );
 
 drop policy if exists "docs: hapus" on public.docs;
-create policy "docs: hapus" on public.docs for delete using (public.my_role() = 'admin');
+create policy "docs: hapus" on public.docs for delete using (
+  public.my_role() = 'admin'
+  or (public.my_role() = 'member' and col in ('topics','comments')
+    and owner = auth.uid() and data->>'by' = auth.uid()::text)
+);
 
 -- 6) Realtime (data tampil langsung di semua perangkat)
 do $$

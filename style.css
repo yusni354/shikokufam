@@ -68,3 +68,7 @@ body.open #dr{transform:none}body.open #ov{display:block}
 .auth-divider:before,.auth-divider:after{content:"";height:1px;flex:1;background:var(--line)}
 .btn.s.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .err{color:#c0392b;font-size:14px;min-height:1em;margin:6px 0}
+.forum-topic>.row{align-items:flex-start}
+.forum-comments{margin:12px 0;border-left:3px solid var(--line);padding-left:12px}
+.forum-comment{padding:10px 0;border-bottom:1px solid var(--line)}
+.forum-comment:last-child{border-bottom:0}
