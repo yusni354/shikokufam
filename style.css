@@ -52,7 +52,9 @@ body.open #dr{transform:none}body.open #ov{display:block}
 #tb a span{display:block;font-size:20px}
 #tb a.on{color:var(--acc);background:var(--line);font-weight:700}
 #pet{position:fixed;right:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:7;cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-#pet img{display:block;height:96px;pointer-events:none;-webkit-user-drag:none}
+#pet img{display:block;height:96
+
+70px;pointer-events:none;-webkit-user-drag:none}
 #pm{position:fixed;left:16px;right:16px;bottom:calc(200px + env(safe-area-inset-bottom,0px));max-width:360px;margin:auto;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 16px 36px rgba(92,169,230,.14);z-index:11}
 #pm .btn{text-align:center;text-decoration:none;display:block}
 #qm{position:fixed;inset:0;background:rgba(23,50,77,.45);display:grid;place-items:center;padding:16px;z-index:12}
